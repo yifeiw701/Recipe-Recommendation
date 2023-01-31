@@ -75,7 +75,6 @@ with st.form("Search"):
                 recipe_img = recipe.find('div', class_='__resp-container lqip css-bc6d9y enk2x9t1').img[
                     'data-src']  # .split('?')[0]
                 st.image(recipe_img)
-
                 counter += 1
                 if counter > 4:
                     break
