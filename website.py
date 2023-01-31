@@ -1,7 +1,7 @@
 import streamlit as st
-import functions
 import requests
 from streamlit_lottie import st_lottie
+from bs4 import BeautifulSoup
 
 st.set_page_config(page_title="Recipe Rcommendation", page_icon=":tada:", layout="wide")
 
@@ -12,14 +12,20 @@ def load_lottieurl(url):
         return None
     return r.json()
 
+
 # ---- LOAD ASSETS ----
-lottie_coding = load_lottieurl("https://assets3.lottiefiles.com/packages/lf20_tll0j4bb.json")
+lottie_coding1 = load_lottieurl("https://assets4.lottiefiles.com/packages/lf20_jbt4j3ea.json")
+lottie_coding2 = load_lottieurl("https://assets3.lottiefiles.com/packages/lf20_tll0j4bb.json")
 
 # ---- HEADER SECTION ----
 with st.container():
-    st.title("Recipe Recommendation Website")
-    st.subheader("Are you missing ideas about recipes? Let us recommend it to you!")
-    st.write("This website is designed to enhance your enjoyment of life.")
+    left_column, right_column = st.columns([3, 2])
+    with left_column:
+        st.title("Recipe Recommendation Website")
+        st.subheader("Are you missing ideas about recipes? Let us recommend it to you!")
+        st.write("This website is designed to enhance your enjoyment of life.")
+    with right_column:
+        st_lottie(lottie_coding1, height=300, key="coding1")
 
 with st.container():
     st.write("---")
@@ -37,36 +43,39 @@ with st.container():
             '''
         )
     with right_column:
-        st_lottie(lottie_coding, height=300, key="coding")
+        st_lottie(lottie_coding2, height=300, key="coding2")
 
-
-def add_ingredient():
-    ingredient = st.session_state["new_ingredient"] + "\n"
-    ingredientList.append(ingredient)
-    functions.write_ingredients(ingredientList)
-ingredientList = functions.get_ingredients()
-
-with st.container():
-    st.write("---")
+with st.form("Search"):
     st.header("Please type the ingredients you want to use")
-    st.empty()
-    st.text_input(label="", placeholder="Add an ingredient...",
-                           on_change=add_ingredient, key='new_ingredient')
+    keywords = st.text_input(label="", placeholder="Please type the ingredients you want to use").split(',')
+    search = st.form_submit_button("Search")
+    if search:
+        page = 'https://www.delish.com/search/?q=' + keywords[0]
+        html_text = requests.get(page).text
+        soup = BeautifulSoup(html_text, 'lxml')
+        recipes = soup.find_all('a', class_='enk2x9t2 css-1jsxw8p epl65fo4')
 
-    if ingredientList:
-        for index, ingredient in enumerate(ingredientList):
-            checkbox = st.checkbox(ingredient, key=ingredient)
-            if checkbox:
-                ingredientList.pop(index)
-                functions.write_ingredients(ingredientList)
-                del st.session_state[ingredient]
-                st.experimental_rerun()
+        counter = 0
+        for recipe in recipes:
+            recipe_link = 'http://www.delish.com' + recipe['href']
+            recipe_text = requests.get(recipe_link).text
+            soup1 = BeautifulSoup(recipe_text, 'lxml')
 
-import re
-collect_numbers = lambda x : [int(i) for i in re.split("[^0-9]", x) if i != ""]
+            ingredients = soup1.find_all('li', class_='css-1rmzm7g eno1xhi2')
+            ingredient_str = ""
+            for e in ingredients:
+                ingredient = e.p.text
+                ingredient_str += ingredient
+                # ingredient_str = ingredient_str.replace(',', ' ')
+            # ingredient_list = ingredient_str.split(' ')
 
-numbers = st.text_input("PLease enter numbers")
-st.write(collect_numbers(numbers))
+            if all(x in ingredient_str for x in keywords):
+                recipe_name = recipe.find('span', class_='css-13cdu9y e1rluvgc5').text
+                st.write(f"[{recipe_name}](%s)" % recipe_link)
+                recipe_img = recipe.find('div', class_='__resp-container lqip css-bc6d9y enk2x9t1').img[
+                    'data-src']  # .split('?')[0]
+                st.image(recipe_img)
 
-fixed_numbers = st.multiselect("Please select numbers", [1, 2, 3, 4, 5])
-st.write(fixed_numbers)
+                counter += 1
+                if counter > 4:
+                    break
