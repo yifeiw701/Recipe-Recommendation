@@ -43,7 +43,6 @@ with st.form("Search"):
             recipe_link = 'http://www.delish.com' + recipe['href']
             recipe_text = requests.get(recipe_link).text
             soup1 = BeautifulSoup(recipe_text, 'lxml')
-
             ingredients = soup1.find_all('li', class_='css-1rmzm7g eno1xhi2')
             ingredient_str = ""
             for e in ingredients:
