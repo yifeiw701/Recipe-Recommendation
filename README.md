@@ -4,7 +4,7 @@ This is a website built in Streamlit that utilizes BeautifulSoup for web scrapin
 
 ## 🧰 Technologies I used
 
-Streamlit, BeautifulSoup
+Python, Streamlit, BeautifulSoup
 
 ## 💡 Demo
 
