@@ -37,7 +37,8 @@ with st.form("Search"):
         page = 'https://www.delish.com/search/?q=' + keywords[0]
         html_text = requests.get(page).text
         soup = BeautifulSoup(html_text, 'lxml')
-        recipes = soup.find_all('a', class_='enk2x9t3 css-1jsxw8p epl65fo4')
+        #single section of each recipes
+        recipes = soup.find_all('a', class_='enk2x9t2 css-1jsxw8p epl65fo4')
         counter = 0
         for recipe in recipes:
             recipe_link = 'http://www.delish.com' + recipe['href']
@@ -50,7 +51,7 @@ with st.form("Search"):
                 ingredient_str += ingredient
             if all(x in ingredient_str for x in keywords):
                 recipe_name = recipe.find('span', class_='css-13cdu9y e1rluvgc5').text
-                recipe_img = recipe.find('div', class_='css-1wrcbbl enk2x9t0').img[
+                recipe_img = recipe.find('div', class_='css-1wrcbbl enk2x9t1').img[
                     'src']  # .split('?')[0]
                 st.header(recipe_name)
                 st.write(f"[{recipe_name}](%s)" % recipe_link)
